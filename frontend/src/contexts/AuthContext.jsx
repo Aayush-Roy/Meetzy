@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }) => {
             });
             if(request.status===httpStatus.OK){
                 localStorage.setItem("token", request.data.token);
-                // router("/home");
+                router("/home");
             }
         }catch(err){
             console.log("Error during login:", err);
@@ -45,9 +45,38 @@ export const AuthProvider = ({ children }) => {
         }
     }
 
-    const data = {
-        userData,setUserData,handleRegister,handleLogin
+
+   const getHistoryOfUser = async () => {
+    try {
+        const request = await client.get("/get_all_activity", {
+            params: { token: localStorage.getItem("token") }
+        });
+        return request.data;
+    } catch (e) {
+        console.error("Error fetching user history", e); 
+        throw e; 
     }
+};
+
+    const addToUserHistory = async(meetingCode)=>{
+        try{
+            let request = await client.post("/add_to_activity",{
+                token:localStorage.getItem("token"),
+                meeting_code:meetingCode
+            });
+            return request;
+        }catch(e){
+            console.log(e)
+        }
+    }
+    
+
+    const data = {
+        userData,setUserData,handleRegister,handleLogin,getHistoryOfUser,addToUserHistory
+    }
+
+ 
+
 
     return (
         <AuthContext.Provider value={data}>

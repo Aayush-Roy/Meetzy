@@ -4,12 +4,12 @@ import MicOffIcon from '@mui/icons-material/MicOff';
 import VideocamIcon from '@mui/icons-material/Videocam';
 import ChatIcon from '@mui/icons-material/Chat';
 import { Badge } from '@mui/material';
-
+import SendIcon from '@mui/icons-material/Send';
 import VideocamOffIcon from '@mui/icons-material/VideocamOff';
 import ScreenShareIcon from '@mui/icons-material/ScreenShare';
 import StopScreenShareIcon from '@mui/icons-material/StopScreenShare';
 import CallEndIcon from '@mui/icons-material/CallEnd';
-
+import {useNavigate} from "react-router-dom";
 const server_url = "http://localhost:8000";
 import { io } from "socket.io-client";
 let connections = {};
@@ -21,7 +21,7 @@ const peerConfigConnections = {
 const VideoMeet = () => {
     var socketRef = useRef();
     let socketIdRef = useRef();
-
+    let routeTo = useNavigate();
     let localVideoRef = useRef();
     const [videoAvailable, setVideoAvailable] = useState(true);
     let [audioAvailable, setAudioAvailable] = useState(true);
@@ -30,9 +30,9 @@ const VideoMeet = () => {
     let[screen,setScreen] = useState();
     let[showModal,setShowModal] = useState();
     let [screenAvailable, setScreenAvailable] = useState();
-    let [messages,setMessages] = useState("");
+    let [messages,setMessages] = useState([]);
     let [message,setMessage] = useState("");
-    let[newMessage,setNewMessage] = useState(3);
+    let[newMessage,setNewMessage] = useState(0);
     let [askForUsername, setAskForUsername] = useState(true); 
     let [username, setUsername] = useState("");
     const videoRef = useRef([]);
@@ -223,9 +223,14 @@ const VideoMeet = () => {
     }
 
     //Todo addMessage
-    let addMessage = (message)=>{
-
-    }
+    let addMessage = (data,sender,socketIdSender)=>{
+      setMessages((prevMessages)=>[
+        ...prevMessages,{sender:sender,data:data} 
+      ])
+      if(socketIdSender!==socketIdRef.current){
+        setNewMessage((prevMessages)=>prevMessages+1);
+      }
+    } 
 
 
     let connectToSocketServer = ()=>{
@@ -335,6 +340,22 @@ const VideoMeet = () => {
       setAudio(!audio);
     }
 
+
+    let sendMessage =()=>{
+      socketRef.current.emit("chat-message",message,username);
+      setMessage("");
+    }
+
+    let handleEndCall=()=>{
+      try{
+        let tracks = localVideoRef.current.srcObject.getTracks();
+        tracks.forEach(track=>track.stop())
+      }catch(e){
+        console.log(e);
+      }
+      routeTo("/home");
+    }
+
   return (
     // <div>
     //   {askForUsername === true ? 
@@ -395,117 +416,245 @@ const VideoMeet = () => {
       />
     </div>
   ) : (
-    <div className="relative flex flex-col flex-1">
-      {/* Video Grid */}
-      <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4 overflow-y-auto bg-gray-950">
-        {/* Local Video */}
-        <div className="relative border border-white rounded-lg overflow-hidden shadow-md">
-          <video
-            ref={localVideoRef}
-            autoPlay
-            muted
-            className="w-full h-64 object-cover"
-          />
-          <div className="absolute bottom-0 left-0 bg-black bg-opacity-50 w-full text-xs px-2 py-1">
-            You ({username})
-          </div>
-        </div>
+//     <div className="relative flex flex-col flex-1">
+//       {/* Video Grid */}
+//       <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4 overflow-y-auto bg-gray-950">
+//         {/* Local Video */}
+//         <div className="relative border border-white rounded-lg overflow-hidden shadow-md">
+//           <video
+//             ref={localVideoRef}
+//             autoPlay
+//             muted
+//             className="w-full h-64 object-cover"
+//           />
+//           <div className="absolute bottom-0 left-0 bg-black bg-opacity-50 w-full text-xs px-2 py-1">
+//             You ({username})
+//           </div>
+//         </div>
 
-        {/* Remote Videos */}
-        {videos.map((video) => (
-          <div key={video.socketId} className="relative border border-white rounded-lg overflow-hidden shadow-md">
+//         {/* Remote Videos */}
+//         {videos.map((video) => (
+//           <div key={video.socketId} className="relative border border-white rounded-lg overflow-hidden shadow-md">
+//             <video
+//               data-socket={video.socketId}
+//               ref={(ref) => {
+//                 if (ref && video.stream) {
+//                   ref.srcObject = video.stream;
+//                 }
+//               }}
+//               autoPlay
+//               className="w-full h-64 object-cover"
+//             />
+//             <div className="absolute bottom-0 left-0 bg-black bg-opacity-50 w-full text-xs px-2 py-1">
+//               {video.socketId.slice(0, 6)}...
+//             </div>
+//           </div>
+//         ))}
+//       </div>
+
+//       {/* Controls */}
+//       <div className="bg-gray-800 py-4 px-6 flex justify-center items-center space-x-6 border-t border-gray-700">
+//         {/* Mute / Unmute */}
+//         <button
+//           // onClick={() => setAudioAvailable((prev) => !prev)}
+//           onClick={handleAudio}
+//           className="p-3 rounded-full bg-gray-700 hover:bg-gray-600"
+//         >
+//           {audio ? (
+//             <MicIcon className="text-green-400" />
+//           ) : (
+//             <MicOffIcon className="text-red-500" />
+//           )}
+//         </button>
+
+//         {/* Video on/off */}
+//         <button
+//           // onClick={() => setVideoAvailable((prev) => !prev)}
+//           onClick={handleVideo}
+//           className="p-3 rounded-full bg-gray-700 hover:bg-gray-600"
+//         >
+//           {video ? (
+//             <VideocamIcon className="text-green-400" />
+//           ) : (
+//             <VideocamOffIcon className="text-red-500" />
+//           )}
+//         </button>
+
+//         {/* Screen Share */}
+//         <button
+//           onClick={() => {
+//             if (!screen) {
+//               navigator.mediaDevices
+//                 .getDisplayMedia({ video: true })
+//                 .then((stream) => {
+//                   setScreen(stream);
+//                   // Replace current stream with screen
+//                   window.localStream = stream;
+//                   localVideoRef.current.srcObject = stream;
+//                 })
+//                 .catch((err) => console.log(err));
+//             } else {
+//               screen.getTracks().forEach((track) => track.stop());
+//               setScreen(null);
+//               getPermission(); // fallback to camera
+//             }
+//           }}
+//           className="p-3 rounded-full bg-gray-700 hover:bg-gray-600"
+//         >
+//           {screen ? (
+//             <StopScreenShareIcon className="text-red-500" />
+//           ) : (
+//             <ScreenShareIcon className="text-blue-400" />
+//           )}
+//         </button> 
+//         {/*Chat Icon */}
+//         <button
+  
+//   className="p-3 rounded-full bg-gray-700 hover:bg-gray-600 relative"
+// >
+//   <Badge badgeContent={newMessage} color="error">
+//     <ChatIcon className="text-white" />
+//   </Badge>
+// </button>
+//         {/* End Call */}
+//         <button
+//           onClick={() => window.location.reload()}
+//           className="p-3 rounded-full bg-red-600 hover:bg-red-700"
+//         >
+//           <CallEndIcon className="text-white" />
+//         </button>
+//       </div>
+//     </div>
+  <div className="relative flex flex-1 overflow-hidden">
+      {/* Main Content Area */}
+      <div className={`flex-1 flex flex-col ${showModal ? 'md:w-3/4' : 'w-full'} transition-all duration-300`}>
+        {/* Video Grid */}
+        <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4 overflow-y-auto bg-gray-950">
+          {/* Local Video */}
+          <div className="relative border border-white rounded-lg overflow-hidden shadow-md">
             <video
-              data-socket={video.socketId}
-              ref={(ref) => {
-                if (ref && video.stream) {
-                  ref.srcObject = video.stream;
-                }
-              }}
+              ref={localVideoRef}
               autoPlay
+              muted
               className="w-full h-64 object-cover"
             />
             <div className="absolute bottom-0 left-0 bg-black bg-opacity-50 w-full text-xs px-2 py-1">
-              {video.socketId.slice(0, 6)}...
+              You ({username})
             </div>
           </div>
-        ))}
-      </div>
 
-      {/* Controls */}
-      <div className="bg-gray-800 py-4 px-6 flex justify-center items-center space-x-6 border-t border-gray-700">
-        {/* Mute / Unmute */}
-        <button
-          // onClick={() => setAudioAvailable((prev) => !prev)}
-          onClick={handleAudio}
-          className="p-3 rounded-full bg-gray-700 hover:bg-gray-600"
-        >
-          {audio ? (
-            <MicIcon className="text-green-400" />
-          ) : (
-            <MicOffIcon className="text-red-500" />
-          )}
-        </button>
+          {/* Remote Videos */}
+          {videos.map((video) => (
+            <div key={video.socketId} className="relative border border-white rounded-lg overflow-hidden shadow-md">
+              <video
+                data-socket={video.socketId}
+                ref={(ref) => {
+                  if (ref && video.stream) {
+                    ref.srcObject = video.stream;
+                  }
+                }}
+                autoPlay
+                className="w-full h-64 object-cover"
+              />
+              <div className="absolute bottom-0 left-0 bg-black bg-opacity-50 w-full text-xs px-2 py-1">
+                {video.socketId.slice(0, 6)}...
+              </div>
+            </div>
+          ))}
+        </div>
 
-        {/* Video on/off */}
-        <button
-          // onClick={() => setVideoAvailable((prev) => !prev)}
-          onClick={handleVideo}
-          className="p-3 rounded-full bg-gray-700 hover:bg-gray-600"
-        >
-          {video ? (
-            <VideocamIcon className="text-green-400" />
-          ) : (
-            <VideocamOffIcon className="text-red-500" />
-          )}
-        </button>
-
-        {/* Screen Share */}
-        <button
-          onClick={() => {
-            if (!screen) {
-              navigator.mediaDevices
-                .getDisplayMedia({ video: true })
-                .then((stream) => {
+        {/* Controls */}
+        <div className="bg-gray-800 py-4 px-6 flex justify-center items-center space-x-6 border-t border-gray-700">
+          <button onClick={handleAudio} className="p-3 rounded-full bg-gray-700 hover:bg-gray-600">
+            {audio ? <MicIcon className="text-green-400" /> : <MicOffIcon className="text-red-500" />}
+          </button>
+          <button onClick={handleVideo} className="p-3 rounded-full bg-gray-700 hover:bg-gray-600">
+            {video ? <VideocamIcon className="text-green-400" /> : <VideocamOffIcon className="text-red-500" />}
+          </button>
+          <button
+            onClick={() => {
+              if (!screen) {
+                navigator.mediaDevices.getDisplayMedia({ video: true }).then((stream) => {
                   setScreen(stream);
-                  // Replace current stream with screen
                   window.localStream = stream;
                   localVideoRef.current.srcObject = stream;
-                })
-                .catch((err) => console.log(err));
-            } else {
-              screen.getTracks().forEach((track) => track.stop());
-              setScreen(null);
-              getPermission(); // fallback to camera
-            }
-          }}
-          className="p-3 rounded-full bg-gray-700 hover:bg-gray-600"
-        >
-          {screen ? (
-            <StopScreenShareIcon className="text-red-500" />
-          ) : (
-            <ScreenShareIcon className="text-blue-400" />
-          )}
-        </button>
-        {/*Chat Icon */}
-        <button
-  
-  className="p-3 rounded-full bg-gray-700 hover:bg-gray-600 relative"
->
-  <Badge badgeContent={newMessage} color="error">
-    <ChatIcon className="text-white" />
-  </Badge>
-</button>
-        {/* End Call */}
-        <button
-          onClick={() => window.location.reload()}
-          className="p-3 rounded-full bg-red-600 hover:bg-red-700"
-        >
-          <CallEndIcon className="text-white" />
-        </button>
+                }).catch((err) => console.log(err));
+              } else {
+                screen.getTracks().forEach((track) => track.stop());
+                setScreen(null);
+                getPermission();
+              }
+            }}
+            className="p-3 rounded-full bg-gray-700 hover:bg-gray-600"
+          >
+            {screen ? <StopScreenShareIcon className="text-red-500" /> : <ScreenShareIcon className="text-blue-400" />}
+          </button>
+
+          {/* Chat Toggle */}
+          <button
+            onClick={() => setShowModal(!showModal)}
+            className="p-3 rounded-full bg-gray-700 hover:bg-gray-600 relative"
+          >
+            <Badge badgeContent={newMessage} color="error">
+              <ChatIcon className="text-white" />
+            </Badge>
+          </button>
+
+          {/* End Call */}
+          <button onClick={handleEndCall} className="p-3 rounded-full bg-red-600 hover:bg-red-700">
+            <CallEndIcon className="text-white" />
+          </button>
+        </div>
       </div>
+
+      {/* Chat Panel */}
+      {showModal && (
+ <div className="fixed inset-0 z-50 md:static md:w-1/4 h-full bg-gray-800 border-l border-gray-700 flex flex-col transition-all duration-300">
+  <div className="p-4 text-lg font-semibold border-b border-gray-700 flex justify-between items-center">
+    <span>Chat</span>
+    <button
+      className="md:hidden text-white text-xl"
+      onClick={() => setShowModal(false)}
+    >
+      ✕
+    </button>
+  </div>
+  <div className="flex-1 overflow-y-auto px-4 py-2 space-y-2">
+    {messages.map((msg, index) => (
+      <div
+        key={index}
+        className={`px-3 py-2 rounded-md ${
+          msg.sender === username ? 'bg-blue-600 text-white self-end' : 'bg-gray-700 text-white'
+        }`}
+      >
+        <span className="font-bold text-yellow-400">{msg.sender}</span>: {msg.data}
+      </div>
+    ))}
+  </div>
+  <div className="p-4 border-t border-gray-700 flex space-x-2">
+    <input
+      value={message}
+      onChange={(e) => setMessage(e.target.value)}
+      type="text"
+      placeholder="Type a message..."
+      className="flex-1 px-3 py-2 rounded bg-gray-700 text-white focus:outline-none"
+    />
+    <button
+      onClick={sendMessage}
+      className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700"
+    >
+      <SendIcon/>
+    </button>
+  </div>
+</div>
+
+)}
+
     </div>
   )}
 </div>
+
+
 
 
   )
