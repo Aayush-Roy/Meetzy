@@ -100,7 +100,7 @@ const addToHistory = async (req, res) => {
         const newMeeting = new Meeting({
             meeting_id: crypto.randomUUID(),
             user_id: user.username,
-            meetingCode: meeting_code
+            meetingCode: meeting_code,
         })
 
         await newMeeting.save();

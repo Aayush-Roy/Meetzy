@@ -393,28 +393,34 @@ const VideoMeet = () => {
     // </div>
     <div className="w-screen h-screen bg-gray-900 text-white flex flex-col">
   {askForUsername ? (
-    <div className="flex-1 flex flex-col items-center justify-center space-y-6">
-      <h2 className="text-3xl font-semibold">Join Meeting</h2>
-      <input
-        type="text"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        className="px-4 py-2 rounded bg-gray-800 text-white w-72 outline-none focus:ring-2 focus:ring-blue-500"
-        placeholder="Enter your name"
-      />
-      <button
-        onClick={connect}
-        className="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded font-medium"
-      >
-        Connect
-      </button>
-      <video
-        ref={localVideoRef}
-        autoPlay
-        muted
-        className="rounded-lg w-96 h-64 object-cover border-2 border-white shadow-lg"
-      />
-    </div>
+   <div className="flex-1 flex flex-col items-center justify-center space-y-8 px-4 py-8 bg-white dark:bg-[#0a0a0a] rounded-2xl shadow-2xl max-w-md mx-auto transition-all duration-300">
+  <h2 className="text-3xl md:text-4xl font-semibold text-gray-900 dark:text-white tracking-tight">
+    Join Meeting
+  </h2>
+
+  <input
+    type="text"
+    value={username}
+    onChange={(e) => setUsername(e.target.value)}
+    className="px-5 py-3 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white w-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+    placeholder="Enter your name"
+  />
+
+  <button
+    onClick={connect}
+    className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white px-6 py-3 rounded-xl font-medium shadow-md hover:shadow-xl transition-all duration-300 w-full"
+  >
+    Connect
+  </button>
+
+  <video
+    ref={localVideoRef}
+    autoPlay
+    muted
+    className="rounded-2xl w-full h-64 object-cover border border-gray-300 dark:border-gray-700 shadow-lg transition-all"
+  />
+</div>
+
   ) : (
 //     <div className="relative flex flex-col flex-1">
 //       {/* Video Grid */}
@@ -527,123 +533,186 @@ const VideoMeet = () => {
 //     </div>
   <div className="relative flex flex-1 overflow-hidden">
       {/* Main Content Area */}
-      <div className={`flex-1 flex flex-col ${showModal ? 'md:w-3/4' : 'w-full'} transition-all duration-300`}>
-        {/* Video Grid */}
-        <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4 overflow-y-auto bg-gray-950">
-          {/* Local Video */}
-          <div className="relative border border-white rounded-lg overflow-hidden shadow-md">
-            <video
-              ref={localVideoRef}
-              autoPlay
-              muted
-              className="w-full h-64 object-cover"
-            />
-            <div className="absolute bottom-0 left-0 bg-black bg-opacity-50 w-full text-xs px-2 py-1">
-              You ({username})
-            </div>
-          </div>
+     <div className={`flex-1 flex flex-col ${showModal ? 'md:w-3/4' : 'w-full'} transition-all duration-300 ease-in-out`}>
+  {/* Video Grid */}
+  <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-6 overflow-y-auto bg-gradient-to-br from-gray-950 to-gray-900">
+    
+    {/* Local Video */}
+    <div className="relative rounded-2xl overflow-hidden shadow-xl border border-gray-700 backdrop-blur-lg">
+      <video
+        ref={localVideoRef}
+        autoPlay
+        muted
+        className="w-full h-64 object-cover rounded-2xl"
+      />
+      <div className="absolute bottom-0 left-0 w-full bg-black/50 text-xs text-white px-3 py-1 backdrop-blur-sm">
+        You ({username})
+      </div>
+    </div>
 
-          {/* Remote Videos */}
-          {videos.map((video) => (
-            <div key={video.socketId} className="relative border border-white rounded-lg overflow-hidden shadow-md">
-              <video
-                data-socket={video.socketId}
-                ref={(ref) => {
-                  if (ref && video.stream) {
-                    ref.srcObject = video.stream;
-                  }
-                }}
-                autoPlay
-                className="w-full h-64 object-cover"
-              />
-              <div className="absolute bottom-0 left-0 bg-black bg-opacity-50 w-full text-xs px-2 py-1">
-                {video.socketId.slice(0, 6)}...
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Controls */}
-        <div className="bg-gray-800 py-4 px-6 flex justify-center items-center space-x-6 border-t border-gray-700">
-          <button onClick={handleAudio} className="p-3 rounded-full bg-gray-700 hover:bg-gray-600">
-            {audio ? <MicIcon className="text-green-400" /> : <MicOffIcon className="text-red-500" />}
-          </button>
-          <button onClick={handleVideo} className="p-3 rounded-full bg-gray-700 hover:bg-gray-600">
-            {video ? <VideocamIcon className="text-green-400" /> : <VideocamOffIcon className="text-red-500" />}
-          </button>
-          <button
-            onClick={() => {
-              if (!screen) {
-                navigator.mediaDevices.getDisplayMedia({ video: true }).then((stream) => {
-                  setScreen(stream);
-                  window.localStream = stream;
-                  localVideoRef.current.srcObject = stream;
-                }).catch((err) => console.log(err));
-              } else {
-                screen.getTracks().forEach((track) => track.stop());
-                setScreen(null);
-                getPermission();
-              }
-            }}
-            className="p-3 rounded-full bg-gray-700 hover:bg-gray-600"
-          >
-            {screen ? <StopScreenShareIcon className="text-red-500" /> : <ScreenShareIcon className="text-blue-400" />}
-          </button>
-
-          {/* Chat Toggle */}
-          <button
-            onClick={() => setShowModal(!showModal)}
-            className="p-3 rounded-full bg-gray-700 hover:bg-gray-600 relative"
-          >
-            <Badge badgeContent={newMessage} color="error">
-              <ChatIcon className="text-white" />
-            </Badge>
-          </button>
-
-          {/* End Call */}
-          <button onClick={handleEndCall} className="p-3 rounded-full bg-red-600 hover:bg-red-700">
-            <CallEndIcon className="text-white" />
-          </button>
+    {/* Remote Videos */}
+    {videos.map((video) => (
+      <div key={video.socketId} className="relative rounded-2xl overflow-hidden shadow-xl border border-gray-700">
+        <video
+          data-socket={video.socketId}
+          ref={(ref) => {
+            if (ref && video.stream) {
+              ref.srcObject = video.stream;
+            }
+          }}
+          autoPlay
+          className="w-full h-64 object-cover rounded-2xl"
+        />
+        <div className="absolute bottom-0 left-0 w-full bg-black/50 text-xs text-white px-3 py-1 backdrop-blur-sm">
+          {video.socketId.slice(0, 6)}...
         </div>
       </div>
+    ))}
+  </div>
+
+  {/* Controls */}
+  <div className="bg-gray-900/80 py-4 px-6 flex justify-center items-center gap-4 sm:gap-6 border-t border-gray-800 backdrop-blur-md shadow-inner">
+    <button
+      onClick={handleAudio}
+      className="p-3 rounded-full bg-gray-800 hover:bg-gray-700 transition"
+    >
+      {audio ? <MicIcon className="text-green-400" /> : <MicOffIcon className="text-red-500" />}
+    </button>
+
+    <button
+      onClick={handleVideo}
+      className="p-3 rounded-full bg-gray-800 hover:bg-gray-700 transition"
+    >
+      {video ? <VideocamIcon className="text-green-400" /> : <VideocamOffIcon className="text-red-500" />}
+    </button>
+
+    <button
+      onClick={() => {
+        if (!screen) {
+          navigator.mediaDevices.getDisplayMedia({ video: true })
+            .then((stream) => {
+              setScreen(stream);
+              window.localStream = stream;
+              localVideoRef.current.srcObject = stream;
+            })
+            .catch((err) => console.log(err));
+        } else {
+          screen.getTracks().forEach((track) => track.stop());
+          setScreen(null);
+          getPermission();
+        }
+      }}
+      className="p-3 rounded-full bg-gray-800 hover:bg-gray-700 transition"
+    >
+      {screen ? <StopScreenShareIcon className="text-red-500" /> : <ScreenShareIcon className="text-blue-400" />}
+    </button>
+
+    {/* Chat Toggle */}
+    <button
+      onClick={() => setShowModal(!showModal)}
+      className="p-3 rounded-full bg-gray-800 hover:bg-gray-700 relative transition"
+    >
+      <Badge badgeContent={newMessage} color="error">
+        <ChatIcon className="text-white" />
+      </Badge>
+    </button>
+
+    {/* End Call */}
+    <button
+      onClick={handleEndCall}
+      className="p-3 rounded-full bg-red-600 hover:bg-red-700 transition shadow-md"
+    >
+      <CallEndIcon className="text-white" />
+    </button>
+  </div>
+</div>
+
 
       {/* Chat Panel */}
       {showModal && (
- <div className="fixed inset-0 z-50 md:static md:w-1/4 h-full bg-gray-800 border-l border-gray-700 flex flex-col transition-all duration-300">
-  <div className="p-4 text-lg font-semibold border-b border-gray-700 flex justify-between items-center">
-    <span>Chat</span>
+//  <div className="fixed inset-0 z-50 md:static md:w-1/4 h-full bg-gray-800 border-l border-gray-700 flex flex-col transition-all duration-300">
+//   <div className="p-4 text-lg font-semibold border-b border-gray-700 flex justify-between items-center">
+//     <span>Chat</span>
+//     <button
+//       className="md:hidden text-white text-xl"
+//       onClick={() => setShowModal(false)}
+//     >
+//       ✕
+//     </button>
+//   </div>
+//   <div className="flex-1 overflow-y-auto px-4 py-2 space-y-2">
+//     {messages.map((msg, index) => (
+//       <div
+//         key={index}
+//         className={`px-3 py-2 rounded-md ${
+//           msg.sender === username ? 'bg-blue-600 text-white self-end' : 'bg-gray-700 text-white'
+//         }`}
+//       >
+//         <span className="font-bold text-yellow-400">{msg.sender}</span>: {msg.data}
+//       </div>
+//     ))}
+//   </div>
+//   <div className="p-4 border-t border-gray-700 flex space-x-2">
+//     <input
+//       value={message}
+//       onChange={(e) => setMessage(e.target.value)}
+//       type="text"
+//       placeholder="Type a message..."
+//       className="flex-1 px-3 py-2 rounded bg-gray-700 text-white focus:outline-none"
+//     />
+//     <button
+//       onClick={sendMessage}
+//       className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700"
+//     >
+//       <SendIcon/>
+//     </button>
+//   </div>
+// </div>
+<div className="fixed inset-0 z-50 md:static md:w-1/4 h-full bg-white border-l md:border-l border-gray-300 flex flex-col transition-all duration-300 shadow-lg rounded-r-xl">
+  {/* Header */}
+  <div className="p-4 text-lg font-semibold border-b border-gray-200 flex justify-between items-center bg-white">
+    <span className="text-gray-900">Chat</span>
     <button
-      className="md:hidden text-white text-xl"
+      className="md:hidden text-gray-500 text-xl"
       onClick={() => setShowModal(false)}
     >
       ✕
     </button>
   </div>
-  <div className="flex-1 overflow-y-auto px-4 py-2 space-y-2">
+
+  {/* Messages */}
+  <div className="flex-1 overflow-y-auto px-4 py-2 space-y-3 bg-gray-100">
     {messages.map((msg, index) => (
       <div
         key={index}
-        className={`px-3 py-2 rounded-md ${
-          msg.sender === username ? 'bg-blue-600 text-white self-end' : 'bg-gray-700 text-white'
+        className={`max-w-[80%] px-4 py-2 rounded-2xl shadow-sm text-sm ${
+          msg.sender === username
+            ? 'ml-auto bg-blue-500 text-white rounded-br-none'
+            : 'mr-auto bg-gray-200 text-gray-900 rounded-bl-none'
         }`}
       >
-        <span className="font-bold text-yellow-400">{msg.sender}</span>: {msg.data}
+        <div className="font-medium text-xs mb-1 text-gray-700">
+          {msg.sender}
+        </div>
+        {msg.data}
       </div>
     ))}
   </div>
-  <div className="p-4 border-t border-gray-700 flex space-x-2">
+
+  {/* Input */}
+  <div className="p-4 border-t border-gray-200 bg-white flex space-x-2 items-center">
     <input
       value={message}
       onChange={(e) => setMessage(e.target.value)}
       type="text"
       placeholder="Type a message..."
-      className="flex-1 px-3 py-2 rounded bg-gray-700 text-white focus:outline-none"
+      className="flex-1 px-4 py-2 rounded-full bg-gray-100 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-400"
     />
     <button
       onClick={sendMessage}
-      className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700"
+      className="bg-blue-500 p-2 rounded-full text-white hover:bg-blue-600 transition"
     >
-      <SendIcon/>
+      <SendIcon />
     </button>
   </div>
 </div>
