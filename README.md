@@ -19,8 +19,8 @@
 
 > Live: [https://meetzy-hzgc.onrender.com](https://meetzyfe.onrender.com)
 
-![Meezy UI Screenshot](<img src="https://drive.google.com/uc?export=view&id=1TDSNqcPHLpZejFho5WdXnVwLAvVvBTEw" alt="Project Screenshot" width="600"/>
-)
+
+<img src="https://drive.google.com/uc?export=view&id=1TDSNqcPHLpZejFho5WdXnVwLAvVvBTEw" alt="Project Screenshot" width="600"/>
 
 ---
 
