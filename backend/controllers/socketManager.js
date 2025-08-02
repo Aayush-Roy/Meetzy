@@ -45,6 +45,7 @@ const connectToSocket = (server) => {
                 if(!isFound && roomValue.includes(socket.id)){
                     return [roomKey, true];
                 }
+                return [room,isFound];
             },['', false]);
             if(found===true){
                 if(messages[matchingRoom]===undefined){
