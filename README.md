@@ -1,9 +1,9 @@
 
 
 
-# 🟣 Meezy
+# 🟣 Meetzy
 
-**Meezy** is a full-stack MERN-based real-time video calling and chat application that enables seamless peer-to-peer video and audio communication with integrated text chat functionality. Built using **Socket.IO**, **WebRTC**, and **STUN servers**, it delivers low-latency communication with a modern responsive UI powered by **MUI** and **Tailwind CSS**.
+**Meetzy** is a full-stack MERN-based real-time video calling and chat application that enables seamless peer-to-peer video and audio communication with integrated text chat functionality. Built using **Socket.IO**, **WebRTC**, and **STUN servers**, it delivers low-latency communication with a modern responsive UI powered by **MUI** and **Tailwind CSS**.
 
 ## 🚀 Features
 
@@ -11,7 +11,7 @@
 - 🔊 Real-time audio/video streaming with STUN server support
 - 💬 Instant text chat using **Socket.IO**
 - 📡 WebSocket-based real-time connection management
-- 👤 Authentication & user management *(optional to mention if implemented)*
+- 👤 Authentication & user management 
 - 🧑‍💻 Responsive and mobile-friendly UI (MUI + Tailwind)
 - 🌐 Deployed on [Render](https://meetzyfe.onrender.com)
 
@@ -77,7 +77,7 @@ The frontend runs on `http://localhost:5173` (or configured Vite port).
 
 ## 🌐 STUN / TURN Configuration
 
-Meezy uses free **STUN** servers to establish direct peer-to-peer connections. You can also integrate **TURN** servers for production use cases where NAT traversal is needed.
+Meetzy uses free **STUN** servers to establish direct peer-to-peer connections. You can also integrate **TURN** servers for production use cases where NAT traversal is needed.
 
 Example WebRTC config:
 
