@@ -140,13 +140,3 @@ This project was a deep dive into:
 
 ---
 
-```
-
-Let me know if you want:
-- Hindi + English mixed version
-- Light/dark theme screenshots or badges
-- Contribution guideline file (`CONTRIBUTING.md`)
-- Deployment section (e.g., Render + Vercel setup)
-
-Once you push this to GitHub, your project will look a lot more polished and professional.
-```
